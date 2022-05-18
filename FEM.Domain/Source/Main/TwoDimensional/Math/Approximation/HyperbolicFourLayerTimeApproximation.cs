@@ -38,6 +38,9 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
         }
         public IEnumerable<Vector> Solution(IFormattedMatrixFactory<FormattedMatrix> factory, ISystemOfEquationSolutionMethod<FormattedMatrix> systemOfEquation)
         {
+            var mass = _nonStationaryTask.MassMatrixOnGrid(factory, _grid);
+            var stiffness = _nonStationaryTask.StiffnessMatrixOnGrid(factory, _grid);
+
             var q1 = new Vector(_grid.CountOfNodes());
             var q2 = new Vector(_grid.CountOfNodes());
             var q3 = new Vector(_grid.CountOfNodes());
@@ -46,15 +49,15 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
             {
                 foreach(var node in _grid.NodesOfElementByNumber(elementNumber))
                 {
-                    q1[node.Id] = _u(node.X, node.Y, _timeLine.TimeOnLayerByNumber(0));
+                    q1[node.Id] = _u(node.X, node.Y, _timeLine.TimeOnLayerByNumber(2));
                     q2[node.Id] = _u(node.X, node.Y, _timeLine.TimeOnLayerByNumber(1));
-                    q3[node.Id] = _u(node.X, node.Y, _timeLine.TimeOnLayerByNumber(2));
+                    q3[node.Id] = _u(node.X, node.Y, _timeLine.TimeOnLayerByNumber(0));
                 }
             }
 
-            yield return q1;
-            yield return q2;
             yield return q3;
+            yield return q2;
+            yield return q1;
 
             for (var layer = 3; layer < _timeLine.CountOfLayers(); layer++)
             {
@@ -79,18 +82,12 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
                 var t21 = t2 - t1;
                 var t20 = t2 - t0;
 
-                var matrixApproximationCoefficient = 2 * _chi * (t1 - t2 - t3) / (t03 * t02 * t01) +
-                                                    _sigma * (t12 * t13) / (t03 * t02 * t01);
-
-                /*var matrixApproximationCoefficient = 2 * _chi * (t01 + t02 + t03) / (t01 * t02 * t03) +
-                                                     _sigma * (1.0 / t01 + 1.0 / t02 + 1.0 / t03) + _gamma;*/
-
-                var mass = _nonStationaryTask.MassMatrixOnGrid(factory, _grid);
-                var stiffness = _nonStationaryTask.StiffnessMatrixOnGrid(factory, _grid);
+                var matrixApproximationCoefficient = 2 * _chi * (2 * t1 - t2 - t3) / (t03 * t02 * t01) +
+                                                     _sigma * (t12 * t13) / (t03 * t02 * t01);
 
                 var approximatedMatrix = matrixApproximationCoefficient * mass;
 
-                var force = _nonStationaryTask.ForceVectorOnGrid(t0, _grid);
+                var force = _nonStationaryTask.ForceVectorOnGrid(t1, _grid);
 
                 var approximatedForce = force -
                                         mass.MultiplyByVector(2 * _chi * (2 * t1 - t0 - t2) / (t32 * t31 * t30) * q3) -
@@ -100,11 +97,6 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
                                         mass.MultiplyByVector(_sigma * (t10 * t13) / (t23 * t21 * t20) * q2) -
                                         mass.MultiplyByVector(_sigma * (t10 * (2 * t1 - t2 - t3) + t12 * t13) / (t13 * t12 * t10) * q1) -
                                         stiffness.MultiplyByVector(q1) - mass.MultiplyByVector(_gamma * q1);
-
-                /*var approximatedForce = force +
-                                        mass.MultiplyByVector((2 * _chi * (t01 + t02) / (t03 * t13 * t23) + _sigma * (t01 * t02) / (t03 * t13 * t23)) * q3) -
-                                        mass.MultiplyByVector((2 * _chi * (t01 + t03) / (t02 * t12 * t23) + _sigma * (t01 * t03) / (t02 * t12 * t23)) * q2) +
-                                        mass.MultiplyByVector((2 * _chi * (t02 + t03) / (t01 * t12 * t13) + _sigma * (t02 * t03) / (t01 * t12 * t13)) * q1);*/
 
                 foreach (var node in _grid.BorderNodes())
                 {
@@ -116,13 +108,34 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
                                                                                   );
 
                 var q = systemOfEquation.SolutionOfSystemWith(approximatedMatrixWithBoundaryConditions, approximatedForce);
-                
-                yield return q;
+
+                var error = new List<double>(q.Size);
+                for (var elementNumber = 0; elementNumber < _grid.CountOfElements(); elementNumber++)
+                {
+                    foreach (var node in _grid.NodesOfElementByNumber(elementNumber))
+                    {
+                        error.Add(System.Math.Pow(_u(node.X, node.Y, t0) - q[node.Id], 2));
+                    }
+                }
+
+                Console.WriteLine($"error: {(System.Math.Sqrt(error.Sum()) / error.Count):e0}");
 
                 q3 = q2;
                 q2 = q1;
                 q1 = q;
+
+                yield return q;
             }
         }
     }
 }
+
+/*
+var matrixApproximationCoefficient = 2 * _chi * (t01 + t02 + t03) / (t01 * t02 * t03) +
+                                                     _sigma * (1.0 / t01 + 1.0 / t02 + 1.0 / t03) + _gamma;
+
+var approximatedForce = force +
+                        mass.MultiplyByVector((2 * _chi * (t01 + t02) / (t03 * t13 * t23) + _sigma * (t01 * t02) / (t03 * t13 * t23)) * q3) -
+                        mass.MultiplyByVector((2 * _chi * (t01 + t03) / (t02 * t12 * t23) + _sigma * (t01 * t03) / (t02 * t12 * t23)) * q2) +
+                        mass.MultiplyByVector((2 * _chi * (t02 + t03) / (t01 * t12 * t13) + _sigma * (t02 * t03) / (t01 * t12 * t13)) * q1);
+*/

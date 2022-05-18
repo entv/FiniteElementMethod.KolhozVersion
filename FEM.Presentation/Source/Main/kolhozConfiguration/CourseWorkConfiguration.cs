@@ -15,6 +15,8 @@ namespace FEM.Presentation.Source.Main.Configuration
         public static HyperbolicFourLayerTimeApproximation ConfigureCourseWork(
                  double width,
                 double height,
+                double timeLength,
+                double timeStep,
                 TimedFunction u,
                 double lambda,
                 double gamma,
@@ -32,9 +34,10 @@ namespace FEM.Presentation.Source.Main.Configuration
 
             var material = new SolidMaterial(lambda, gamma);
             var force = new TestTimeForce(u, lambda, gamma, sigma, chi);
+
             var task = new NonStationaryTask(finiteElement, force, material);
 
-            var time = new UniformTimeLine(50.0, 1.0);
+            var time = new UniformTimeLine(timeLength, timeStep);
 
             return new HyperbolicFourLayerTimeApproximation(
                     task,

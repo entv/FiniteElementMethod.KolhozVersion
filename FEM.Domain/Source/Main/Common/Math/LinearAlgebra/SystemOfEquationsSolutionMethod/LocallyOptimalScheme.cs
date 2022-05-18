@@ -6,7 +6,7 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolu
     public class LocallyOptimalScheme : ISystemOfEquationSolutionMethod<FormattedMatrix>
     {
         private const int _maxIterations = 10000;
-        private const double _epsilon = 1e-12;
+        private const double _epsilon = 1e-22;
 
         public LocallyOptimalScheme()
         {
@@ -33,7 +33,7 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolu
                 result += alpha * z;
                 r -= alpha * p;
                 
-                if (r * r < _epsilon)
+                if ((r.EuqlideanNorm / vector.EuqlideanNorm) < _epsilon)
                 {
                     return result;
                 }
