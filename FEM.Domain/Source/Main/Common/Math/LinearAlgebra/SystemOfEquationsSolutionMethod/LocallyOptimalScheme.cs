@@ -6,7 +6,7 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolu
     public class LocallyOptimalScheme : ISystemOfEquationSolutionMethod<FormattedMatrix>
     {
         private const int _maxIterations = 10000;
-        private const double _epsilon = 1e-22;
+        private const double _epsilon = 1e-20;
 
         public LocallyOptimalScheme()
         {

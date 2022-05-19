@@ -5,7 +5,7 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Physic.Force
     public class TestTimeForce : ITimedForce
     {
         private readonly TimedFunction _baseFunction;
-        private const double _h = 1e-5;
+        private const double _h = 1e-3;
 
         private readonly double _lambda;
         private readonly double _gamma;
@@ -50,8 +50,8 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Physic.Force
                                       30 * _baseFunction(x, y, time) +
                                       16 * _baseFunction(x, y, time - _h) -
                                       _baseFunction(x, y, time - 2 * _h)) / (12 * _h * _h);
-                
-            return -_lambda * (secondDerivativeByX + secondDerivativeByY) +
+
+            return -_lambda * (secondDerivativeByY + secondDerivativeByX) +
                     _gamma * _baseFunction(x, y, time) +
                     _sigma * firstDerivativeByTime + _chi * secondDerivativeByTime;
         }

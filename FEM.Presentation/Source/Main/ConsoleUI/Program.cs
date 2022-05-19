@@ -11,11 +11,11 @@ namespace FEM.Presentation.Source.Main.ConsoleUI
         {
             double width = 1.0;
             double height = 1.0;
-            var countOfElementsInLine = 1;
+            var countOfElementsInLine = 80;//5 10 20 40 80
             var countOfElements = countOfElementsInLine * countOfElementsInLine;
 
             double time = 1.0;
-            double timeStep = .01;
+            double timeStep = .1;
 
             double lambda = 1.0;
             double gamma = 1.0;
@@ -23,7 +23,7 @@ namespace FEM.Presentation.Source.Main.ConsoleUI
             double sigma = 1.0;
             double chi = 1.0;
 
-            TimedFunction u = (x, y, t) => Math.Pow(t, 3) + Math.Pow(x, 3) + Math.Pow(y, 3);
+            TimedFunction u = (x, y, t) => Math.Exp(x);//Math.Pow(t, 2)
 
             var approximation = CourseWorkConfiguration.ConfigureCourseWork(
                     width,

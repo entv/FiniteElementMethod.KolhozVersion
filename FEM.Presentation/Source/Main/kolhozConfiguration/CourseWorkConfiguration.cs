@@ -36,9 +36,7 @@ namespace FEM.Presentation.Source.Main.Configuration
             var force = new TestTimeForce(u, lambda, gamma, sigma, chi);
 
             var task = new NonStationaryTask(finiteElement, force, material);
-
             var time = new UniformTimeLine(timeLength, timeStep);
-
             return new HyperbolicFourLayerTimeApproximation(
                     task,
                     grid,

@@ -109,17 +109,6 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
 
                 var q = systemOfEquation.SolutionOfSystemWith(approximatedMatrixWithBoundaryConditions, approximatedForce);
 
-                var error = new List<double>(q.Size);
-                for (var elementNumber = 0; elementNumber < _grid.CountOfElements(); elementNumber++)
-                {
-                    foreach (var node in _grid.NodesOfElementByNumber(elementNumber))
-                    {
-                        error.Add(System.Math.Pow(_u(node.X, node.Y, t0) - q[node.Id], 2));
-                    }
-                }
-
-                Console.WriteLine($"error: {(System.Math.Sqrt(error.Sum()) / error.Count):e0}");
-
                 q3 = q2;
                 q2 = q1;
                 q1 = q;
