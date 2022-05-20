@@ -12,7 +12,7 @@ namespace FEM.Presentation.Source.Main.Configuration
 {
     public static class CourseWorkConfiguration
     {
-        public static HyperbolicFourLayerTimeApproximation ConfigureCourseWork(
+        public static ITimeApproximation ConfigureCourseWork(
                  double width,
                 double height,
                 double timeLength,
@@ -28,7 +28,7 @@ namespace FEM.Presentation.Source.Main.Configuration
             var gridFactory = new UniformGridFactory();
             var formattedMatrixFactory = new SparseMatrixFactory();
 
-            var finiteElement = new BiquadraticRectangularFiniteElement();
+            var finiteElement = new BilinearRectangularFiniteElement();
 
             var grid = gridFactory.CreateGrid(width, height, numberOfFiniteElementsInLine, finiteElement.CountOfNodes());
 
@@ -37,7 +37,8 @@ namespace FEM.Presentation.Source.Main.Configuration
 
             var task = new NonStationaryTask(finiteElement, force, material);
             var time = new UniformTimeLine(timeLength, timeStep);
-            return new HyperbolicFourLayerTimeApproximation(
+            Console.WriteLine(grid.CountOfNodes());
+            return new HyperbolicFourLayerImplicitTimeApproximation(
                     task,
                     grid,
                     time,

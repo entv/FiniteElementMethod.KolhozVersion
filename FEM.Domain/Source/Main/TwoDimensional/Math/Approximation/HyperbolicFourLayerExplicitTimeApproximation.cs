@@ -8,7 +8,7 @@ using FEM.Domain.Source.Main.TwoDimensional.Physic.TimeLine;
 
 namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
 {
-    public class HyperbolicFourLayerTimeApproximation : ITimeApproximation
+    public class HyperbolicFourLayerExplicitTimeApproximation : ITimeApproximation
     {
         private readonly INonStationaryTask _nonStationaryTask;
         private readonly IGrid _grid;
@@ -18,7 +18,7 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
         private double _gamma;
         private TimedFunction _u;
 
-        public HyperbolicFourLayerTimeApproximation(
+        public HyperbolicFourLayerExplicitTimeApproximation(
                 INonStationaryTask nonStationaryTask,
                 IGrid grid,
                 ITimeLine timeLine,
@@ -120,11 +120,11 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
 }
 
 /*
-var matrixApproximationCoefficient = 2 * _chi * (t01 + t02 + t03) / (t01 * t02 * t03) +
+var matrixApproximationCoefficient = 2 * _chi * (t01 + t02 + t03) / (t03 * t02 * t01) +
                                                      _sigma * (1.0 / t01 + 1.0 / t02 + 1.0 / t03) + _gamma;
 
-var approximatedForce = force +
-                        mass.MultiplyByVector((2 * _chi * (t01 + t02) / (t03 * t13 * t23) + _sigma * (t01 * t02) / (t03 * t13 * t23)) * q3) -
-                        mass.MultiplyByVector((2 * _chi * (t01 + t03) / (t02 * t12 * t23) + _sigma * (t01 * t03) / (t02 * t12 * t23)) * q2) +
-                        mass.MultiplyByVector((2 * _chi * (t02 + t03) / (t01 * t12 * t13) + _sigma * (t02 * t03) / (t01 * t12 * t13)) * q1);
+var approximatedForce = force -
+                        mass.MultiplyByVector((2 * _chi * (t01 + t02) / (t32 * t31 * t30) + _sigma * (t01 * t02) / (t32 * t31 * t30)) * q3) -
+                        mass.MultiplyByVector((2 * _chi * (t01 + t03) / (t23 * t21 * t20) + _sigma * (t01 * t03) / (t23 * t21 * t20)) * q2) -
+                        mass.MultiplyByVector((2 * _chi * (t02 + t03) / (t13 * t12 * t10) + _sigma * (t02 * t03) / (t13 * t12 * t10)) * q1);
 */
