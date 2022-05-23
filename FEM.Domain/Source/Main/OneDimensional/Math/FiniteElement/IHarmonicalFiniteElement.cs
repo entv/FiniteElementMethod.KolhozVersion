@@ -1,5 +1,6 @@
 ﻿using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes;
 using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Vectors;
+using FEM.Domain.Source.Main.OneDimensional.Geometry.Nodes;
 using FEM.Domain.Source.Main.OneDimensional.Physic.Parameters;
 
 namespace FEM.Domain.Source.Main.OneDimensional.Math.FiniteElement

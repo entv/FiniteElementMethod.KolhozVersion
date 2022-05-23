@@ -1,8 +1,9 @@
-﻿using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Vectors;
+﻿using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes.Formatted;
+using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Vectors;
 
 namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes
 {
-    public class SparseFormattedMatrix : DecomposableFormattedMatrix
+    public class SparseFormattedMatrix : FormattedMatrix, IDecomposableFormattedMatrix, ITransposableFormattedMatrix
     {
         private IList<double> _diagonalElements;
         private IList<double> _upperElements;
@@ -19,7 +20,7 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes
             _offsets = offsets;
         }
 
-        public override IMatrixDecomposition IncompleteDecomposition(IDecompositionMethod decompositionMethod)
+        public IMatrixDecomposition IncompleteDecomposition(IDecompositionMethod decompositionMethod)
         {
             return decompositionMethod.IncompleteDecomposition(
                 _diagonalElements,
@@ -48,7 +49,18 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes
             return result;
         }
 
-        public override FormattedMatrix WithFirstBoundaryCondition(IEnumerable<int> rows)
+        public FormattedMatrix TransposedMatrix()
+        {
+            return new SparseFormattedMatrix(
+                    _diagonalElements,
+                    _lowerElements,
+                    _upperElements,
+                    _columns,
+                    _offsets
+                );
+        }
+
+        protected override SparseFormattedMatrix FirstBoundary(IEnumerable<int> rows)
         {
             var diagonalElements = new double[_diagonalElements.Count];
             var upperElements = new double[_upperElements.Count];

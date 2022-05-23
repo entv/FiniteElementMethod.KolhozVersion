@@ -1,4 +1,5 @@
-﻿using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Vectors;
+﻿using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes.Formatted;
+using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Vectors;
 
 namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes
 {
@@ -6,9 +7,13 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes
     {
         protected abstract FormattedMatrix SumWith(FormattedMatrix other);
         protected abstract FormattedMatrix MultiplyBy(double coefficient);
+        protected abstract FormattedMatrix FirstBoundary(IEnumerable<int> rows);
         public abstract Vector MultiplyByVector(Vector vector);
 
-        public abstract FormattedMatrix WithFirstBoundaryCondition(IEnumerable<int> rows);
+        public TFormattedMatrix WithFirstBoundaryCondition<TFormattedMatrix>(IEnumerable<int> rows) where TFormattedMatrix : FormattedMatrix
+        {
+            return (TFormattedMatrix)FirstBoundary(rows);
+        }
         public static FormattedMatrix operator+(FormattedMatrix first, FormattedMatrix second)
         {
             return first.SumWith(second);

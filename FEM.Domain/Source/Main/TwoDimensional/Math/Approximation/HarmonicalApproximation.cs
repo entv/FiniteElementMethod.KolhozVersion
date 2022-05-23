@@ -1,11 +1,11 @@
 ﻿using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes;
 using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolutionMethod;
 using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Vectors;
-using FEM.Domain.Source.Main.OneDimensional.Geometry.Grid;
-using FEM.Domain.Source.Main.OneDimensional.Math.Functions;
-using FEM.Domain.Source.Main.OneDimensional.Math.TaskTypes;
+using FEM.Domain.Source.Main.TwoDimensional.Geometry.Grid;
+using FEM.Domain.Source.Main.TwoDimensional.Math.Function;
+using FEM.Domain.Source.Main.TwoDimensional.Math.TaskTypes;
 
-namespace FEM.Domain.Source.Main.OneDimensional.Math.Approximation
+namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
 {
     public class HarmonicalApproximation : IApproximation
     {
@@ -13,17 +13,14 @@ namespace FEM.Domain.Source.Main.OneDimensional.Math.Approximation
         private readonly IGrid _grid;
         private readonly IHarmonicalFunction _u;
 
-        public HarmonicalApproximation(
-                IHarmonicalTask task,
-                IGrid grid,
-                IHarmonicalFunction u
-            )
+        public HarmonicalApproximation(IHarmonicalTask task, IGrid grid, IHarmonicalFunction u)
         {
             _task = task;
             _grid = grid;
             _u = u;
         }
-        public Vector Solution(IFormattedMatrixFactory<FormattedMatrix> factory, ISystemOfEquationSolutionMethod<FormattedMatrix> systemOfEquation)
+
+        public Vector Solution<TFormattedMatrix>(IFormattedMatrixFactory<TFormattedMatrix> factory, ISystemOfEquationSolutionMethod<TFormattedMatrix> systemOfEquation) where TFormattedMatrix : FormattedMatrix
         {
             var force = _task.ForceVectorOnGrid(_grid);
             var matrix = _task.MatrixOnGrid(_grid, factory);
@@ -31,16 +28,17 @@ namespace FEM.Domain.Source.Main.OneDimensional.Math.Approximation
             var firstConditionsNodes = _grid.BorderNodes()
                                        .Select(node => 2 * node.Id)
                                        .Concat(_grid.BorderNodes().Select(node => 2 * node.Id + 1))
-                                       .OrderBy(x => x);
+                                       .OrderBy(x => x).ToList();
 
-            foreach(var node in _grid.BorderNodes())
+            foreach (var node in _grid.BorderNodes())
             {
-                force[2 * node.Id] = _u.ValueInPointOnCosinePart(node.Value);
-                force[2 * node.Id + 1] = _u.ValueInPointOnSinePart(node.Value);
+                force[2 * node.Id] = _u.ValueInPointOnSinePart(node.X, node.Y);
+                force[2 * node.Id + 1] = _u.ValueInPointOnCosinePart(node.X, node.Y);
             }
-            var matrixWithBoundaryConditions = matrix.WithFirstBoundaryCondition<FormattedMatrix>(firstConditionsNodes);
+            var matrixWithBoundaryConditions = matrix.WithFirstBoundaryCondition<TFormattedMatrix>(firstConditionsNodes);
+            
 
             return systemOfEquation.SolutionOfSystemWith(matrixWithBoundaryConditions, force);
-        } 
+        }
     }
 }

@@ -3,7 +3,7 @@ using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Vectors;
 
 namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolutionMethod
 {
-    public class LocallyOptimalSchemeWithDecomposition : ISystemOfEquationSolutionMethod<DecomposableFormattedMatrix>
+    public class LocallyOptimalSchemeWithDecomposition<TDecomposableFormattedMatrix> : ISystemOfEquationSolutionMethod<TDecomposableFormattedMatrix> where TDecomposableFormattedMatrix : FormattedMatrix, IDecomposableFormattedMatrix
     {
         private readonly IDecompositionMethod _decompositionMethod;
         private const int _maxIterations = 10000;
@@ -14,7 +14,7 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolu
             _decompositionMethod = decompositionMethod;
         }
 
-        public Vector SolutionOfSystemWith(DecomposableFormattedMatrix matrix, Vector vector)
+        public Vector SolutionOfSystemWith(TDecomposableFormattedMatrix matrix, Vector vector)
         {
             var result = new Vector(vector.Size);
 

@@ -1,12 +1,12 @@
-﻿using FEM.Domain.Source.Main.Common.ArrayExtensions;
-using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes;
+﻿using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes;
 using FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Vectors;
-using FEM.Domain.Source.Main.OneDimensional.Geometry.Grid;
-using FEM.Domain.Source.Main.OneDimensional.Math.FiniteElement;
-using FEM.Domain.Source.Main.OneDimensional.Physic.Force;
 using FEM.Domain.Source.Main.OneDimensional.Physic.Parameters;
+using FEM.Domain.Source.Main.TwoDimensional.Geometry.Grid;
+using FEM.Domain.Source.Main.TwoDimensional.Math.FiniteElement;
+using FEM.Domain.Source.Main.TwoDimensional.Physic.Force;
+using FEM.Domain.Source.Main.Common.ArrayExtensions;
 
-namespace FEM.Domain.Source.Main.OneDimensional.Math.TaskTypes
+namespace FEM.Domain.Source.Main.TwoDimensional.Math.TaskTypes
 {
     public class HarmonicalTask : IHarmonicalTask
     {
@@ -21,7 +21,7 @@ namespace FEM.Domain.Source.Main.OneDimensional.Math.TaskTypes
             _parameters = parameters;
             _force = force;
         }
-        public FormattedMatrix MatrixOnGrid(IGrid grid, IFormattedMatrixFactory<FormattedMatrix> factory)
+        public TFormattedMatrix MatrixOnGrid<TFormattedMatrix>(IGrid grid, IFormattedMatrixFactory<TFormattedMatrix> factory) where TFormattedMatrix : FormattedMatrix 
         {
             var connectivityList = ConnectivityListOnGrid(grid);
             var nonDiagonalElementsCount = connectivityList.Select(elementsInRow => elementsInRow.Count()).Sum();
@@ -47,7 +47,8 @@ namespace FEM.Domain.Source.Main.OneDimensional.Math.TaskTypes
             {
                 var nodesOfElement = grid.NodesOfElementByNumber(elementNumber);
                 var localMatrixOnElement = _finiteElement.MatrixOnElement(
-                            grid.LengthOfElementByNumber(elementNumber),
+                            grid.WidthOfElement(),
+                            grid.HeightOfElement(),
                             _parameters
                         );
 
@@ -68,10 +69,9 @@ namespace FEM.Domain.Source.Main.OneDimensional.Math.TaskTypes
                                 if (globalRow == globalColumn)
                                 {
                                     diagonalElements[globalRow] += localMatrixOnElement[_blockSize * i + row, _blockSize * j + column];
-                                } 
+                                }
                                 else if (globalColumn < globalRow)
                                 {
-                                    var test = columns.IndexOf(globalColumn, offsets[globalRow]);
                                     lowerElements[columns.IndexOf(globalColumn, offsets[globalRow])] += localMatrixOnElement[_blockSize * i + row, _blockSize * j + column];
                                     upperElements[columns.IndexOf(globalColumn, offsets[globalRow])] += localMatrixOnElement[_blockSize * j + row, _blockSize * i + column];
                                 }
@@ -80,6 +80,8 @@ namespace FEM.Domain.Source.Main.OneDimensional.Math.TaskTypes
                     }
                 }
             }
+
+            
 
             return factory.CreateFormattedMatrix(
                     diagonalElements,
@@ -97,19 +99,20 @@ namespace FEM.Domain.Source.Main.OneDimensional.Math.TaskTypes
             for (int elementNumber = 0; elementNumber < grid.CountOfElements(); elementNumber++)
             {
                 var nodesOfElement = grid.NodesOfElementByNumber(elementNumber);
-                var lengthOfElement = grid.LengthOfElementByNumber(elementNumber);
+                var widthOfElement = grid.WidthOfElement();
+                var heightOfElement = grid.HeightOfElement();
 
                 var forceSinePart = new Vector(nodesOfElement.Count());
                 var forceCosinePart = new Vector(nodesOfElement.Count());
                 for (int i = 0; i < nodesOfElement.Count(); i++)
                 {
-                    var point = nodesOfElement.ElementAt(i).Value;
-                    forceSinePart[i] = _force.ValueInPointOnSinePart(point);
-                    forceCosinePart[i] = _force.ValueInPointOnCosinePart(point);
+                    var node = nodesOfElement.ElementAt(i);
+                    forceSinePart[i] = _force.ValueInPointOnSinePart(node.X, node.Y);
+                    forceCosinePart[i] = _force.ValueInPointOnCosinePart(node.X, node.Y);
                 }
 
-                var forceSinePartWithMass = _finiteElement.BaseMassMatrixOnElement(lengthOfElement) * forceSinePart;
-                var forceCosinePartWithMass = _finiteElement.BaseMassMatrixOnElement(lengthOfElement) * forceCosinePart;
+                var forceSinePartWithMass = _finiteElement.BaseMassMatrixOnElement(widthOfElement, heightOfElement) * forceSinePart;
+                var forceCosinePartWithMass = _finiteElement.BaseMassMatrixOnElement(widthOfElement, heightOfElement) * forceCosinePart;
 
                 for (int i = 0; i < nodesOfElement.Count(); i++)
                 {
@@ -144,7 +147,7 @@ namespace FEM.Domain.Source.Main.OneDimensional.Math.TaskTypes
                         if (rowOfBlock == columnOfBlock)
                         {
                             list[rowOfBlock * _blockSize + 1].Add(columnOfBlock * _blockSize);
-                        } 
+                        }
                         else
                         {
                             for (int k = 0; k < _blockSize; k++)

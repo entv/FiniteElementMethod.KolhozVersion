@@ -1,18 +1,19 @@
-﻿using FEM.Domain.Source.Main.OneDimensional.Geometry.Grid.Factories;
-using FEM.Domain.Source.Main.OneDimensional.Math.Approximation;
-using FEM.Domain.Source.Main.OneDimensional.Math.FiniteElement;
-using FEM.Domain.Source.Main.OneDimensional.Math.Functions;
-using FEM.Domain.Source.Main.OneDimensional.Math.TaskTypes;
-using FEM.Domain.Source.Main.OneDimensional.Physic.Force;
-using FEM.Domain.Source.Main.OneDimensional.Physic.Parameters;
+﻿using FEM.Domain.Source.Main.OneDimensional.Physic.Parameters;
+using FEM.Domain.Source.Main.TwoDimensional.Geometry.Grid;
+using FEM.Domain.Source.Main.TwoDimensional.Math.Approximation;
+using FEM.Domain.Source.Main.TwoDimensional.Math.FiniteElement;
+using FEM.Domain.Source.Main.TwoDimensional.Math.Function;
+using FEM.Domain.Source.Main.TwoDimensional.Math.TaskTypes;
+using FEM.Domain.Source.Main.TwoDimensional.Physic.Force;
 
 namespace FEM.Presentation.Source.Main.Configuration
 {
     public static class ThirdLaboratoryConfiguration
     {
         public static HarmonicalApproximation ConfigureThirdLaboratory(
-                double length,
-                int countOfElements,
+                double width,
+                double height,
+                int numberOfFiniteElementsInLine,
                 double lambda,
                 double omega,
                 double sigma,
@@ -22,21 +23,14 @@ namespace FEM.Presentation.Source.Main.Configuration
             )
         {
             var gridFactory = new UniformGridFactory();
-            var finiteElement = new BilinearHarmonicFiniteElement();
+            var finiteElement = new HarmonicalFiniteElement(new Domain.Source.Main.OneDimensional.Math.FiniteElement.BilinearHarmonicFiniteElement());
 
             var grid = gridFactory.CreateGrid(
-                    length,
-                    finiteElement.CountOfNodes(),
-                    countOfElements
+                    width,
+                    height,
+                    numberOfFiniteElementsInLine,
+                    finiteElement.CountOfNodes()
                 );
-
-            for (int i = 0; i < countOfElements; i++)
-            {
-                foreach (var node in grid.NodesOfElementByNumber(i))
-                {
-                    //Console.WriteLine(node.Id + "->" + node.Value);
-                }
-            }
 
             var parameters = new HarmonicalParameters(
                     lambda,
@@ -45,10 +39,9 @@ namespace FEM.Presentation.Source.Main.Configuration
                     chi
                 );
 
-            var harmonicalFunction = new HarmonicalFuntion(uCosPart, uSinePart);
+            var harmonicalFunction = new HarmonicalFunction(uCosPart, uSinePart);
 
             var force = new TestHarmonicalForce(harmonicalFunction, lambda, omega, sigma, chi);
-
             var task = new HarmonicalTask(finiteElement, parameters, force);
 
             return new HarmonicalApproximation(task, grid, harmonicalFunction);

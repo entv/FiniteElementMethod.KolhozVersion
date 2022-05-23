@@ -2,8 +2,8 @@
 
 namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Matrixes
 {
-    public abstract class DecomposableFormattedMatrix : FormattedMatrix
+    public interface IDecomposableFormattedMatrix
     {
-        public abstract IMatrixDecomposition IncompleteDecomposition(IDecompositionMethod decompositionMethod);
+        public IMatrixDecomposition IncompleteDecomposition(IDecompositionMethod decompositionMethod);
     }
 }

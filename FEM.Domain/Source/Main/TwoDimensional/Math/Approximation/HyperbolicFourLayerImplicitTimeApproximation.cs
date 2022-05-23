@@ -98,7 +98,7 @@ namespace FEM.Domain.Source.Main.TwoDimensional.Math.Approximation
                 {
                     approximatedForce[node.Id] = _u(node.X, node.Y, t0);
                 }
-                var approximatedMatrixWithBoundaryConditions = approximatedMatrix.WithFirstBoundaryCondition(
+                var approximatedMatrixWithBoundaryConditions = approximatedMatrix.WithFirstBoundaryCondition<FormattedMatrix>(
                                                                                     _grid.BorderNodes()
                                                                                     .Select(node => node.Id)
                                                                                   );
