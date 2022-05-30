@@ -6,8 +6,8 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolu
 {
     public class BisjointGradientsStabilizedMethod<TFormattedMatrix> : ISystemOfEquationSolutionMethod<TFormattedMatrix> where TFormattedMatrix : FormattedMatrix, ITransposableFormattedMatrix
     {
-        private const int _maxIterations = 10000;
-        private const double _epsilon = 1e-12;
+        private const int _maxIterations = 1000;
+        private const double _epsilon = 1e-16;
         
         public BisjointGradientsStabilizedMethod()
         {
@@ -23,6 +23,7 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolu
             var z = new Vector(vector.Size);
             var p = new Vector(vector.Size);
             var s = new Vector(vector.Size);
+            var resPrev = new Vector(vector.Size);
             for (int i = 0; i < vector.Size; i++)
             {
                 r[i] = vector[i];
@@ -33,13 +34,25 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolu
             {
                 double alpha = (p * r) / (s * matrix.MultiplyByVector(z));
 
+                for (int i = 0; i < vector.Size; i++)
+                {
+                    resPrev[i] = result[i];
+                }
+
                 result += alpha * z;
                 var pr_k1 = p * r;
                 r -= alpha * matrix.MultiplyByVector(z);
                 p -= alpha * transposedMatrix.MultiplyByVector(s);
 
+                if (resPrev == result)
+                {
+                    Console.WriteLine($"iterations: {iteration + 1}");
+                    return result;
+                }
+
                 if ((matrix.MultiplyByVector(result) - vector).EuqlideanNorm / vector.EuqlideanNorm < _epsilon)
                 {
+                    Console.WriteLine($"iterations: {iteration + 1}");
                     return result;
                 }
 

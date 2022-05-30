@@ -5,7 +5,7 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolu
 {
     public class LocallyOptimalScheme<TFormattedMatrix> : ISystemOfEquationSolutionMethod<TFormattedMatrix> where TFormattedMatrix : FormattedMatrix
     {
-        private const int _maxIterations = 10000;
+        private const int _maxIterations = 1000;
         private const double _epsilon = 1e-16;
 
         public LocallyOptimalScheme()
@@ -19,7 +19,7 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolu
             var r = new Vector(vector.Size);
             var z = new Vector(vector.Size);
             var p = new Vector(vector.Size);
-
+            var resPrev = new Vector(vector.Size);
             for (int i = 0; i < vector.Size; i++)
             {
                 r[i] = vector[i];
@@ -29,12 +29,24 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.SystemOfEquationsSolu
 
             for (int iteration = 0; iteration < _maxIterations; iteration++)
             {
+                for (int i = 0; i < vector.Size; i++)
+                {
+                    resPrev[i] = result[i];
+                }
+
                 double alpha = (p * r) / (p * p);
                 result += alpha * z;
                 r -= alpha * p;
-                
+
+                if (resPrev == result)
+                {
+                    Console.WriteLine($"iterations: {iteration + 1}");
+                    return result;
+                }
+
                 if ((r.EuqlideanNorm / vector.EuqlideanNorm) < _epsilon)
                 {
+                    Console.WriteLine($"iterations: {iteration + 1}");
                     return result;
                 }
 

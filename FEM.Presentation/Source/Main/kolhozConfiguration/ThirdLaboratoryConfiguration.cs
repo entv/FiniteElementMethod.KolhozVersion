@@ -23,7 +23,7 @@ namespace FEM.Presentation.Source.Main.Configuration
             )
         {
             var gridFactory = new UniformGridFactory();
-            var finiteElement = new HarmonicalFiniteElement(new Domain.Source.Main.OneDimensional.Math.FiniteElement.BilinearHarmonicFiniteElement());
+            var finiteElement = new HarmonicalFiniteElement();
 
             var grid = gridFactory.CreateGrid(
                     width,
@@ -43,6 +43,10 @@ namespace FEM.Presentation.Source.Main.Configuration
 
             var force = new TestHarmonicalForce(harmonicalFunction, lambda, omega, sigma, chi);
             var task = new HarmonicalTask(finiteElement, parameters, force);
+
+            Console.WriteLine($"count of elements: {grid.CountOfElements()}");
+            Console.WriteLine($"count of nodes: {grid.CountOfNodes()}");
+            Console.WriteLine($"lambda: {lambda:e2}, omega: {omega:e2}, sigma: {sigma:e2}, chi: {chi:e2}");
 
             return new HarmonicalApproximation(task, grid, harmonicalFunction);
         }

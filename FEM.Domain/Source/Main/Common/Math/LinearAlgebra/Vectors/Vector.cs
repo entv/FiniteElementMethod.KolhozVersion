@@ -110,5 +110,23 @@ namespace FEM.Domain.Source.Main.Common.Math.LinearAlgebra.Vectors
 
             return result;
         }
+
+        public static bool operator==(Vector first, Vector second)
+        {
+            for (int i = 0; i < first.Size; i++)
+            {
+                if (first[i] != second[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool operator !=(Vector first, Vector second)
+        {
+            return !(first == second);
+        }
     }
 }

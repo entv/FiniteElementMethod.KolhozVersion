@@ -9,17 +9,17 @@ namespace FEM.Presentation.Source.Main.ConsoleUI
     {
         public static void Main()
         {
-            var width = 1.0;
-            var height = 1.0;
-            var countOfElementsInLine = 10;
+            var width = 1;
+            var height = 1;
+            var countOfElementsInLine = 100;
 
             double lambda = 1;
             double omega = 1;
-            double sigma = 1;
-            double chi = 0;
+            double sigma = 1e+8;
+            double chi = 1e-11;
 
-            Function uSinePart = (x, y) => x;
-            Function uCosPart = (x, y) => 1;
+            Function uSinePart = (x, y) => 2 * x;
+            Function uCosPart = (x, y) => -2 * x + y;
 
             var approximation = ThirdLaboratoryConfiguration.ConfigureThirdLaboratory(
                         width,
@@ -33,21 +33,23 @@ namespace FEM.Presentation.Source.Main.ConsoleUI
                         uCosPart
                     );
 
-            var result = approximation.Solution(new SparseMatrixFactory(), new LocallyOptimalScheme<SparseFormattedMatrix>());
-            //var result = approximation.Solution(new SparseMatrixFactory(), new BisjointGradientsStabilizedMethod<SparseFormattedMatrix>());
+            Console.WriteLine("los:");
+            approximation.Solution(new SparseMatrixFactory(), new LocallyOptimalScheme<SparseFormattedMatrix>());
+            Console.WriteLine("bsg:");
+            approximation.Solution(new SparseMatrixFactory(), new BisjointGradientsStabilizedMethod<SparseFormattedMatrix>());
 
             //Console.WriteLine("<-------------------------------------------------------------------------->");
-            for (int i = 0; i < result.Size; i++)
-            {
+            //for (int i = 0; i < result.Size; i++)
+            //{
                 //Console.Write(result[i] + " ");
-            }
+            //}
             //Console.WriteLine();
             //Console.WriteLine("<-------------------------------------------------------------------------->");
 
-            for (int i = 0; i < result.Size / 2; i++)
-            {
+            //for (int i = 0; i < result.Size / 2; i++)
+            //{
                 //Console.Write(result[2 * i] + result[2 * i + 1] + " ");
-            }
+            //}
         }
     }
 }

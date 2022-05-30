@@ -28,8 +28,8 @@ namespace FEM.Domain.Source.Main.OneDimensional.Math.FiniteElement
             var sigma = harmonicParameters.Sigma();
             var chi = harmonicParameters.Chi();
 
-            var p00 = (-lambda / (2.0 * length)) - (omega * omega * chi / 3.0);
-            var p10 = (lambda / (2.0 * length)) - (omega * omega * chi / 6.0);
+            var p00 = -(lambda / length) - (omega * omega * chi * length / 3.0);
+            var p10 = -(lambda / length) - (omega * omega * chi * length / 6.0);
 
             var c00 = omega * sigma * length / 3.0;
             var c10 = omega * sigma * length / 6.0;
